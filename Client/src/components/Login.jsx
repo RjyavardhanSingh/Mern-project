@@ -1,54 +1,44 @@
+// src/components/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-function SignUp() {
+function Login({ onLogin }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSignUp = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
-      // Replace with your signup API endpoint
-      const response = await fetch('/api/signup', {
+      const response = await fetch('http://localhost:5000/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
 
-      if (response.ok) {
-        alert('Signup successful! You can now log in.');
-        navigate('/login');
-      } else {
-        setError(data.message || 'An error occurred. Please try again.');
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
       }
+
+      alert(data.message);
+      onLogin();  // Update the authentication state
+      navigate('/home'); // Redirect to home after login
     } catch (error) {
-      setError('An error occurred. Please try again.');
+      console.error('Error during login:', error);
+      setError(error.message);
     }
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <form onSubmit={handleSignUp} className="bg-white p-8 rounded shadow-md max-w-md w-full">
-        <h2 className="text-2xl font-bold mb-4">Sign Up</h2>
-        
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+      <form onSubmit={handleLogin} className="bg-white p-8 rounded shadow-md max-w-md w-full">
+        <h2 className="text-2xl font-bold mb-4">Login</h2>
         {error && <p className="text-red-500 mb-4">{error}</p>}
-        
-        <label htmlFor="name" className="block font-semibold mb-2">Name</label>
-        <input
-          type="text"
-          id="name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          required
-          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
 
         <label htmlFor="email" className="block font-semibold mb-2">Email</label>
         <input
@@ -74,11 +64,20 @@ function SignUp() {
           type="submit"
           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-semibold"
         >
-          Sign Up
+          Login
         </button>
+
+        <div className="mt-4">
+          <button
+            onClick={() => navigate('/signup')}
+            className="text-blue-500 hover:underline"
+          >
+            No account? Sign up here.
+          </button>
+        </div>
       </form>
     </div>
   );
 }
 
-export default SignUp;
+export default Login;

@@ -1,3 +1,4 @@
+// src/components/Navbar.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -9,6 +10,7 @@ function Navbar({ isAuthenticated, onLogout }) {
         <div>
           {isAuthenticated ? (
             <>
+              <Link to="/home" className="text-white mx-2">Home</Link>
               <Link to="/profile" className="text-white mx-2">Profile</Link>
               <Link to="/write" className="text-white mx-2">Write Story</Link>
               <button onClick={onLogout} className="text-white mx-2">Logout</button>
