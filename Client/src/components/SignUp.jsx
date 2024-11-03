@@ -11,7 +11,7 @@ const SignUp = () => {
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/signup', { // Ensure the correct API path
+      const response = await fetch('http://localhost:5000/signup', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name, email, password }),
@@ -20,11 +20,11 @@ const SignUp = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Signup failed'); // Use data.message or a default message
+        throw new Error(data.message || 'Signup failed'); 
       }
 
-      alert(data.message); // Show success message
-      navigate('/login'); // Redirect to login page after signup
+      alert(data.message); 
+      navigate('/login'); 
     } catch (error) {
       console.error('Error during signup:', error);
       alert('Signup failed: ' + error.message);

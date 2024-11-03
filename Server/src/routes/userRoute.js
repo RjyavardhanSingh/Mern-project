@@ -7,25 +7,34 @@ const {
   getStories,
   getProfile,
   updateProfile,
-  getFeed
+  getFeed,
+  submitInterests,
+  getUserStories 
 } = require('../controller/controller.js');
+const authenticate = require('../middleware/auth.js');
 
 const router = express.Router();
 
-// User Routes
+
 router.post('/signup', signup);
 router.post('/login', login);
 
-// Story Routes
-router.post('/stories', createStory);
+
+router.post('/profiles/interests', authenticate, submitInterests);
+
+
+router.post('/stories', authenticate, createStory);
 router.get('/stories', getStories);
 
-// Profile Routes
-router.get('/profiles/:userId', getProfile);
-router.put('/profiles/:userId', updateProfile);
 
-// Feed Routes
-router.get('/feeds/:userId', getFeed);
+router.get('/stories/user', authenticate, getUserStories); 
 
-// Export the router
+
+router.get('/profiles', authenticate, getProfile);
+router.put('/profiles', authenticate, updateProfile);
+
+
+router.get('/feeds', authenticate, getFeed);
+
+
 module.exports = router;

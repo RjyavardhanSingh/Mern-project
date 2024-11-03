@@ -1,4 +1,3 @@
-// src/components/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -25,9 +24,22 @@ function Login({ onLogin }) {
         throw new Error(data.error || 'Login failed');
       }
 
-      alert(data.message);
-      onLogin();  // Update the authentication state
-      navigate('/home'); // Redirect to home after login
+      if (data.token) {
+       
+        localStorage.setItem('token', data.token);
+        
+      
+        onLogin(data.token);
+
+       
+        alert(data.message || 'Login successful!');
+
+       
+        navigate('/');
+        window.location.reload();
+      } else {
+        throw new Error('Token not received from server');
+      }
     } catch (error) {
       console.error('Error during login:', error);
       setError(error.message);
@@ -66,15 +78,6 @@ function Login({ onLogin }) {
         >
           Login
         </button>
-
-        <div className="mt-4">
-          <button
-            onClick={() => navigate('/signup')}
-            className="text-blue-500 hover:underline"
-          >
-            No account? Sign up here.
-          </button>
-        </div>
       </form>
     </div>
   );

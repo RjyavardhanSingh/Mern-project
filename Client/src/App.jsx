@@ -1,5 +1,5 @@
 // src/App.jsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Login from './components/Login';
@@ -9,13 +9,26 @@ import Profile from './components/Profile';
 import WriteStory from './components/WriteStory';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return localStorage.getItem('token') !== null;
+  });
 
-  const handleLogin = () => {
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogin = (token) => {
+    // Store token in localStorage
+    localStorage.setItem('token', token);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    
+    localStorage.removeItem('token');
     setIsAuthenticated(false);
   };
 

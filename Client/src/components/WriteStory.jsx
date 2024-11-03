@@ -4,24 +4,28 @@ import { useNavigate } from 'react-router-dom';
 function WriteStory() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [tags, setTags] = useState(''); 
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     try {
-      // Replace with your story submission API endpoint
-      const response = await fetch('/api/stories', {
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:5000/stories', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, content }),
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `bearer ${token}`,
+        },
+        body: JSON.stringify({ title, content, tags: tags.split(',').map(tag => tag.trim()) }), 
       });
-
+  
       if (response.ok) {
         alert('Story submitted successfully!');
-        navigate('/');
+        navigate('/profile');
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to submit the story. Please try again.');
@@ -30,6 +34,8 @@ function WriteStory() {
       setError('An error occurred. Please try again.');
     }
   };
+  
+  
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
@@ -56,6 +62,15 @@ function WriteStory() {
           rows="6"
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         ></textarea>
+
+        <label htmlFor="tags" className="block font-semibold mb-2">Tags (comma-separated)</label>
+        <input
+          type="text"
+          id="tags"
+          value={tags}
+          onChange={(e) => setTags(e.target.value)}
+          className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
 
         <button
           type="submit"

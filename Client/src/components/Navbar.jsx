@@ -1,8 +1,24 @@
-// src/components/Navbar.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 
-function Navbar({ isAuthenticated, onLogout }) {
+function Navbar() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+  
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token'); 
+    setIsAuthenticated(false);
+    navigate('/login');
+  };
+
   return (
     <nav className="bg-blue-600 p-4">
       <div className="container mx-auto flex justify-between items-center">
@@ -10,10 +26,9 @@ function Navbar({ isAuthenticated, onLogout }) {
         <div>
           {isAuthenticated ? (
             <>
-              <Link to="/home" className="text-white mx-2">Home</Link>
               <Link to="/profile" className="text-white mx-2">Profile</Link>
               <Link to="/write" className="text-white mx-2">Write Story</Link>
-              <button onClick={onLogout} className="text-white mx-2">Logout</button>
+              <button onClick={handleLogout} className="text-white mx-2">Logout</button>
             </>
           ) : (
             <>

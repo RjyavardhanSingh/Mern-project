@@ -1,9 +1,16 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 
 function Home() {
   const navigate = useNavigate();
-  const isLoggedIn = false; // Replace with actual login check logic
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(()=>{
+    const token = localStorage.getItem('token');
+    if(token){
+      setIsLoggedIn(true)
+    }
+  },[])
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
@@ -28,32 +35,13 @@ function Home() {
             onClick={() => navigate('/write')}
             className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 font-semibold mb-12"
           >
-            Write a Story
+            Whats Your Story
           </button>
+
+          
         )}
       </section>
 
-      <section className="w-full max-w-3xl">
-        <h2 className="text-2xl font-semibold text-gray-800 mb-4">Your Personalized Feed</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Example stories - replace with dynamic content from API */}
-          <div className="p-4 bg-white rounded shadow hover:shadow-md transition-shadow">
-            <h3 className="text-xl font-bold text-blue-600">Story Title 1</h3>
-            <p className="text-gray-600">A brief description of the story...</p>
-            <Link to="/story/1" className="text-blue-500 hover:underline mt-2 block">
-              Read More
-            </Link>
-          </div>
-          <div className="p-4 bg-white rounded shadow hover:shadow-md transition-shadow">
-            <h3 className="text-xl font-bold text-blue-600">Story Title 2</h3>
-            <p className="text-gray-600">A brief description of the story...</p>
-            <Link to="/story/2" className="text-blue-500 hover:underline mt-2 block">
-              Read More
-            </Link>
-          </div>
-          
-        </div>
-      </section>
     </div>
   );
 }
