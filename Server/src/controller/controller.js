@@ -1,46 +1,67 @@
 const User = require('../models/User.js');
 const Story = require('../models/Story.js');
-const Profile = require('../models/Profile.js');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+
+
 dotenv.config();
 
 const SECRET_KEY = process.env.SECRET_KEY;
-
-
+// User Signup
 const signup = async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, bio } = req.body;
+  console.log('Received signup data:', req.body);  // Add logging
 
   try {
+    // Check if the email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'User already exists' });
+      return res.status(400).json({ message: 'Email already in use' });
     }
 
-   
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new User({ name, email, password: hashedPassword });
-    await newUser.save();
+    if (!password) {
+      return res.status(400).json({ message: 'Password is required' });
+    }
 
-    res.status(201).json({ message: 'User registered successfully', userId: newUser._id });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      name,
+      email,
+      password: hashedPassword,
+      bio: bio || '',  // Default to empty bio if not provided
+    });
+
+    const savedUser = await newUser.save();
+
+    const token = jwt.sign({ id: savedUser._id }, process.env.SECRET_KEY, { expiresIn: '1h' });
+
+    res.status(201).json({
+      message: 'User created successfully!',
+      token,
+      user: savedUser,
+      userId: savedUser._id,
+    });
+
   } catch (error) {
-    console.error('Error during signup:', error);
-    res.status(500).json({ message: 'Internal Server Error' });
+    console.error('Error during signup:', error);  // Add logging
+    res.status(500).json({ message: 'Failed to create user', error: error.message });
   }
 };
 
 
+
+
+
+// User Login
 const login = async (req, res) => {
   const { email, password } = req.body;
   try {
     const user = await User.findOne({ email });
     if (user && await bcrypt.compare(password, user.password)) {
-     
       const token = jwt.sign({ userId: user._id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
-
       res.status(200).json({ message: 'Login successful!', token, userId: user._id, name: user.name });
     } else {
       res.status(401).json({ error: 'Invalid credentials' });
@@ -50,34 +71,40 @@ const login = async (req, res) => {
   }
 };
 
+// Submit User Interests
 const submitInterests = async (req, res) => {
-  const { interests } = req.body;
+  const { interests, userId } = req.body;
+
+  if (!interests || !userId) {
+    return res.status(400).json({ message: 'Invalid data' });
+  }
 
   try {
-    const user = await User.findOneAndUpdate(
-      { _id: req.user._id }, 
-      { interests },
-      { new: true, runValidators: true }
-    );
-
+    // Assuming you're saving to a database
+    const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.status(200).json({ message: 'Interests updated successfully', user });
+    user.interests = interests;
+    await user.save();
+
+    return res.status(200).json({ message: 'Interests updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update interests', error: error.message });
+    console.error(error);
+    return res.status(500).json({ message: 'Internal server error' });
   }
 };
 
+
+
+// Create Story
 const createStory = async (req, res) => {
   const { title, content, tags } = req.body;
-
 
   if (!title || !content) {
     return res.status(400).json({ message: 'Title and content are required.' });
   }
-  
 
   if (!req.user) {
     return res.status(401).json({ message: 'Unauthorized: User not authenticated.' });
@@ -87,25 +114,22 @@ const createStory = async (req, res) => {
     const newStory = new Story({
       title,
       content,
-      author: req.user.name, 
-      tags: Array.isArray(tags) ? tags : [], 
+      author: req.user.name, // Use the authenticated user's name
+      tags: Array.isArray(tags) ? tags : [],
     });
 
     await newStory.save();
     return res.status(201).json({ message: 'Story created successfully!', story: newStory });
   } catch (error) {
     console.error('Error creating story:', error);
-    
     if (error.name === 'ValidationError') {
       return res.status(400).json({ message: 'Validation error: ' + error.message });
     }
-    
     return res.status(500).json({ message: 'Error saving the story. Please try again.' });
   }
 };
 
-
-
+// Get Stories
 const getStories = async (req, res) => {
   try {
     const stories = await Story.find().populate('author', 'name');
@@ -115,25 +139,31 @@ const getStories = async (req, res) => {
   }
 };
 
-
+// Get User Profile and Stories
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-    const stories = await Story.find({ author: user.name })
+    const user = await User.findById(req.user._id);
+    const stories = await Story.find({ author: user.name });
+    // const Profile = await Profile.findOne({ user: req.user._id });
+    const profilepictire = user.profilePicture;
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ user, stories }); 
+    res.json({ user, stories,profilepictire });
   } catch (error) {
     res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
   }
 };
 
 
+
+// Update User Profile
 const updateProfile = async (req, res) => {
   const { email, name, password } = req.body;
+  
+  
 
   try {
     const updateFields = {};
@@ -141,57 +171,93 @@ const updateProfile = async (req, res) => {
     if (name) updateFields.name = name;
     if (password) updateFields.password = await bcrypt.hash(password, 10);
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id, 
-      { $set: updateFields },
-      { new: true, runValidators: true }
-    );
+
+    const user = await User.findByIdAndUpdate(req.user._id, { $set: updateFields }, { new: true, runValidators: true });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ message: 'Profile updated successfully', user });
+    
+    res.json({ message: 'Profile updated successfully', user,});
   } catch (error) {
     res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };
 
 
+
+
+// Get Feed Based on User Interests
 const getFeed = async (req, res) => {
   try {
+    // Fetch the authenticated user's interests and convert them to lowercase
     const user = await User.findOne({ _id: req.user._id });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
+    const userInterests = user.interests.map((interest) => interest.toLowerCase());
 
-    const stories = await Story.find({ tags: { $in: user.interests } }).populate('author', 'name');
+    // Fetch stories with tags that match any of the user's interests
+    const stories = await Story.find({
+      tags: { $in: userInterests }
+    })
+      .populate('author', 'name')  // Populate author name
+      .sort({ createdAt: -1 });    // Sort stories by creation date (most recent first)
 
-    res.status(200).json(stories);
+    res.status(200).json(stories);  // Return the stories in response
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch feed' });
   }
 };
 
 
+// Get User Stories
 const getUserStories = async (req, res) => {
   try {
-      const stories = await Story.find({ author: req.user._id })
-          .sort({ createdAt: -1 }); 
-      
-      res.status(200).json({
-          success: true,
-          data: stories
-      });
-      
+    const stories = await Story.find({ author: req.user._id }).sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: stories });
   } catch (error) {
-      res.status(500).json({
-          success: false,
-          message: 'Error fetching stories',
-          error: error.message
-      });
+    res.status(500).json({ success: false, message: 'Error fetching stories', error: error.message });
   }
 };
+
+// Like Story
+const likeStory = async (req, res) => {
+  const { storyId } = req.params;
+
+  try {
+    // Find the story by ID
+    const story = await Story.findById(storyId);
+    console.log(story);
+    
+    if (!story) {
+      return res.status(404).json({ message: 'Story not found' });
+    }
+
+    // Check if the user already liked the story
+    if (!Array.isArray(story.likes)) {
+      story.likes = [];  // Initialize as an empty array if it's not an array
+    }
+
+    if (!story.likes.includes(req.user._id)) {
+      // Add user ID to the likes array
+      story.likes.push(req.user._id);
+      await story.save();
+
+      // Count the number of likes
+      const likesCount = story.likes.length;
+
+      res.status(200).json({ message: 'Story liked successfully', likesCount });
+    } else {
+      res.status(400).json({ message: 'You already liked this story' });
+    }
+  } catch (error) {
+    console.error('Error liking story:', error);
+    res.status(500).json({ message: 'Error liking the story', error: error.message });
+  }
+};
+
 
 module.exports = {
   signup,
@@ -203,4 +269,5 @@ module.exports = {
   getFeed,
   submitInterests,
   getUserStories,
+  likeStory
 };

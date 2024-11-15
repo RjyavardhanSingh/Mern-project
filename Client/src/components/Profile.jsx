@@ -4,18 +4,19 @@ import { useNavigate } from 'react-router-dom';
 function Profile() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [bio, setBio] = useState('');
   const [stories, setStories] = useState([]);
   const [showUpdateForm, setShowUpdateForm] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchUserStories = async () => {
-      const token = localStorage.getItem('token'); 
+    const fetchUserProfile = async () => {
+      const token = localStorage.getItem('token');
       try {
         const response = await fetch('http://localhost:5000/profiles', {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -23,7 +24,8 @@ function Profile() {
           const data = await response.json();
           setName(data.user.name);
           setEmail(data.user.email);
-          setStories(data.stories); 
+          setBio(data.user.bio || '');
+          setStories(data.stories || []);
         } else {
           const data = await response.json();
           setError(data.message || 'Failed to fetch profile.');
@@ -33,23 +35,26 @@ function Profile() {
       }
     };
 
-    fetchUserStories();
+    fetchUserProfile();
   }, []);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     setError('');
 
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
+    const formData = new FormData();
+    formData.append('name', name);
+    formData.append('email', email);
+    formData.append('bio', bio);
 
     try {
       const response = await fetch('http://localhost:5000/profiles', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email, name }), 
+        body: formData,
       });
 
       if (response.ok) {
@@ -60,6 +65,7 @@ function Profile() {
         setError(data.message || 'Failed to update profile. Please try again.');
       }
     } catch (error) {
+      console.error('Error during profile update:', error);
       setError('An error occurred. Please try again.');
     }
   };
@@ -69,6 +75,8 @@ function Profile() {
       <h2 className="text-2xl font-bold mb-4">Profile Settings</h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
+      <h3 className="text-xl font-semibold mb-4">{name}</h3>
+
       <button
         onClick={() => setShowUpdateForm(!showUpdateForm)}
         className="bg-blue-600 text-white p-2 rounded mb-4"
@@ -77,8 +85,13 @@ function Profile() {
       </button>
 
       {showUpdateForm && (
-        <form onSubmit={handleUpdate} className="bg-white p-8 rounded shadow-md max-w-md w-full mb-4">
-          <label htmlFor="name" className="block font-semibold mb-2">Name</label>
+        <form
+          onSubmit={handleUpdate}
+          className="bg-white p-8 rounded shadow-md max-w-md w-full mb-4"
+        >
+          <label htmlFor="name" className="block font-semibold mb-2">
+            Name
+          </label>
           <input
             type="text"
             id="name"
@@ -87,7 +100,9 @@ function Profile() {
             className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          <label htmlFor="email" className="block font-semibold mb-2">Email</label>
+          <label htmlFor="email" className="block font-semibold mb-2">
+            Email
+          </label>
           <input
             type="email"
             id="email"
@@ -96,13 +111,15 @@ function Profile() {
             className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          <label htmlFor="password" className="block font-semibold mb-2">Password (leave blank to keep current)</label>
-          <input
-            type="password"
-            id="password"
-            onChange={(e) => setPassword(e.target.value)} 
+          <label htmlFor="bio" className="block font-semibold mb-2">
+            Bio
+          </label>
+          <textarea
+            id="bio"
+            value={bio}
+            onChange={(e) => setBio(e.target.value)}
             className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          ></textarea>
 
           <button
             type="submit"
@@ -123,7 +140,10 @@ function Profile() {
               {story.content.length > 100
                 ? `${story.content.substring(0, 100)}...`
                 : story.content}
-              <a href={`/stories/${story._id}`} className="text-blue-500"> Read more</a>
+              <a href={`/stories/${story._id}`} className="text-blue-500">
+                {' '}
+                Read more
+              </a>
             </p>
           </div>
         ))}
