@@ -6,6 +6,7 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   name: { type: String, required: true },
   interests: { type: [String], default:[] },
+  imageUrl: { type: String, default: '' },
   bio: { type: String, default: '' },
   createdAt: { type: Date, default: Date.now },
   likedStories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Story' }] 

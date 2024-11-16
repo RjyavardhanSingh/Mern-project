@@ -13,7 +13,9 @@ const {
   getLikedStories,
   unlikeStory,
   getStoryById,
-  updateStory
+  updateStory,
+  searchUser,
+  deleteUserProfile
 } = require('../controller/controller.js');
 const authenticate = require('../middleware/auth.js');
 
@@ -35,6 +37,7 @@ router.get('/stories/:userId', authenticate, getLikedStories);
 router.delete('/stories/:storyId/like', authenticate, unlikeStory);
 router.get('/clicked/stories/:storyId', getStoryById); // Get a specific story by ID
 router.put('/stories/:storyId', authenticate, updateStory); // Update story (requires authentication)
+router.delete('/delete-profile', authenticate, deleteUserProfile);
 
 
 // Profile Routes
@@ -43,5 +46,7 @@ router.put('/profiles', authenticate, updateProfile); // Update user profile
 
 // Feed Route
 router.get('/feeds', authenticate, getFeed); // Get user feed (requires authentication)
+
+router.get("/search", searchUser); // Search for users by name
 
 module.exports = router;

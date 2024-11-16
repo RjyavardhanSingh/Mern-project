@@ -1,71 +1,64 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
-function Home() {
+const Interests = () => {
+  const [selectedInterests, setSelectedInterests] = useState([]);
   const navigate = useNavigate();
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [feed, setFeed] = useState([]);
-  const [loading, setLoading] = useState(true);
 
+  const genres = [
+    'Horror', 'Anime', 'Comedy', 'Drama', 'Sci-Fi', 'Fantasy', 
+    'Mystery', 'Romance', 'Thriller', 'Adventure'
+  ];
+
+  // Retrieve userId from localStorage
+  const userId = localStorage.getItem('userId');
+
+  // Use useEffect to navigate if userId is missing
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      setIsLoggedIn(true);
-      fetchFeed(token);  // Fetch the feed if logged in
+    if (!userId) {
+      navigate('/signup');
     }
-  }, []);
+  }, [userId, navigate]);
 
-  // Fetch the feed for the logged-in user
-  const fetchFeed = async (token) => {
-    try {
-      const response = await fetch('http://localhost:5000/feeds', {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch feed');
-      }
-  
-      const data = await response.json();
-      // Ensure that story.likes is always an array
-      const updatedFeed = data.map(story => ({
-        ...story,
-        likeCount: (story.likes || []).length, // Ensure likes is always an array
-      }));
-      setFeed(updatedFeed);
-      setLoading(false);
-    } catch (error) {
-      console.error('Error fetching feed:', error);
-      setLoading(false);
+  // Handle interest selection
+  const handleSelect = (genre) => {
+    if (selectedInterests.includes(genre)) {
+      setSelectedInterests(selectedInterests.filter(item => item !== genre));
+    } else {
+      setSelectedInterests([...selectedInterests, genre]);
     }
   };
 
-  // Handle like button click
-  const handleLike = async (storyId) => {
-    const userId = localStorage.getItem('userId'); // Fetch the user ID from localStorage
-    const token = localStorage.getItem('token'); // Fetch the token from localStorage
-  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const interestsData = {
+      interests: selectedInterests,  // Array of selected interests
+      userId: userId,  // Use the userId from localStorage
+    };
+
+    console.log('Interests data being sent:', interestsData);
+
     try {
-      const response = await fetch(`http://localhost:5000/stories/${storyId}/like`, {
+      const response = await fetch('http://localhost:5000/interests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ userId }),
+        body: JSON.stringify(interestsData),
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to like story');
+
+      if (response.ok) {
+        const result = await response.json();
+        console.log('Interests submitted:', result);
+        // Optionally, navigate to another page (e.g., dashboard) after submission
+        navigate('/login');
+      } else {
+        const errorData = await response.json();
+        console.error('Error:', errorData);
       }
-  
-      const data = await response.json();
-      console.log('Story liked:', data);
     } catch (error) {
-      console.error('Error liking story:', error);
+      console.error('Error:', error);
     }
   };
 
@@ -84,73 +77,36 @@ function Home() {
 
       {/* Main Content */}
       <div className="relative z-10 w-full max-w-4xl text-center py-8 px-4">
-        <h1 className="text-3xl font-bold mb-6 text-[#F5F3EF] font-cursive">
-          Welcome to StoryWriting Platform
-        </h1>
+        <h1 className="text-3xl font-bold mb-6 text-[#F5F3EF] font-cursive">Select Your Favorite Genres</h1>
         <p className="text-lg mb-8 text-[#F5F3EF] font-serif">
-          Dive into a world of creativity and storytelling! Whether you’re here to share your stories or explore narratives from other writers, this platform is designed just for you.
+          Choose the genres you love, and we’ll tailor your experience just for you.
         </p>
 
-        {!isLoggedIn ? (
-          <div className="flex gap-4 mb-12">
-            <Link
-              to="/login"
-              className="bg-[#4B2E1A] text-[#F5F3EF] px-4 py-2 rounded hover:bg-[#8C4D2E] font-semibold"
+        {/* Genre Options */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
+          {genres.map((genre, index) => (
+            <div
+              key={index}
+              onClick={() => handleSelect(genre)}
+              className={`p-2 rounded-lg shadow-md transition-all duration-300 cursor-pointer ${selectedInterests.includes(genre)
+                ? "bg-[#8C4D2E] text-[#F5F3EF] opacity-90"
+                : "bg-[#D2B48C] text-[#4B2E1A] opacity-70"} hover:scale-105`}
             >
-              Login
-            </Link>
-            <Link
-              to="/signup"
-              className="bg-[#8C4D2E] text-[#F5F3EF] px-4 py-2 rounded hover:bg-[#4B2E1A] font-semibold"
-            >
-              Sign Up
-            </Link>
-          </div>
-        ) : (
-          <div>
-            <button
-              onClick={() => navigate('/write')}
-              className="bg-[#4B2E1A] text-[#F5F3EF] px-4 py-2 rounded hover:bg-[#8C4D2E] font-semibold mb-12"
-            >
-              What's Your Story?
-            </button>
+              <h3 className="text-xl font-semibold mt-2 font-serif">{genre}</h3>
+            </div>
+          ))}
+        </div>
 
-            {/* Feed display for logged-in users */}
-            {loading ? (
-              <p className="text-lg text-[#F5F3EF]">Loading feed...</p>
-            ) : feed.length === 0 ? (
-              <p className="text-lg text-[#F5F3EF]">No stories to show based on your interests yet.</p>
-            ) : (
-              <div>
-                <h2 className="text-2xl font-bold text-[#F5F3EF] mb-4">Your Personalized Feed</h2>
-                <div className="space-y-4">
-                  {feed.map((story) => (
-                    <div key={story._id} className="bg-[#D2B48C] p-4 rounded shadow-md">
-                      <h3 className="text-xl font-semibold text-[#4B2E1A]">{story.title}</h3>
-                      <p className="text-[#4B2E1A]">{story.content.substring(0, 200)}...</p>
-                      <p className="text-sm text-[#4B2E1A]">By {story.author.name}</p>
-                      <p className="text-sm text-[#4B2E1A]">Tags: {story.tags.join(', ')}</p>
-
-                      {/* Like button */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <button
-                          onClick={() => handleLike(story._id)}
-                          className="text-[#4B2E1A] hover:text-[#8C4D2E]"
-                        >
-                          ❤️ Like
-                        </button>
-                        <span className="text-sm text-[#4B2E1A]">{story.likeCount} Likes</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+        {/* Submit Button */}
+        <button
+          onClick={handleSubmit}
+          className="mt-8 px-6 py-2 bg-[#4B2E1A] text-[#F5F3EF] rounded-full shadow-lg font-medium hover:bg-[#8C4D2E] transition-all"
+        >
+          Save My Interests
+        </button>
       </div>
     </div>
   );
-}
+};
 
-export default Home;
+export default Interests;

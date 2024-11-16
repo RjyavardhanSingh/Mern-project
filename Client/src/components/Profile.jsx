@@ -13,6 +13,12 @@ function Profile() {
   useEffect(() => {
     const fetchUserProfile = async () => {
       const token = localStorage.getItem('token');
+      if (!token) {
+        // If no token, redirect to login page
+        navigate('/login');
+        return;
+      }
+
       try {
         const response = await fetch('http://localhost:5000/profiles', {
           headers: {
@@ -36,19 +42,19 @@ function Profile() {
     };
 
     fetchUserProfile();
-  }, []);
+  }, [navigate]);
 
   const handleUpdate = async (e) => {
     e.preventDefault();
     setError('');
-  
+
     const token = localStorage.getItem('token');
     const data = {
       name,
       email,
       bio,
     };
-  
+
     try {
       const response = await fetch('http://localhost:5000/profiles', {
         method: 'PUT',
@@ -58,16 +64,16 @@ function Profile() {
         },
         body: JSON.stringify(data),  // Send the data as JSON
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         alert('Profile updated successfully!');
-  
+
         // Update the local state with the new user data
         setName(data.user.name);
         setEmail(data.user.email);
         setBio(data.user.bio);
-  
+
         navigate('/profile'); // Redirect to profile page after update
       } else {
         const data = await response.json();
@@ -78,6 +84,49 @@ function Profile() {
       setError('An error occurred. Please try again.');
     }
   };
+
+  const handleDeleteProfile = async () => {
+    const token = localStorage.getItem('token');
+    
+    if (!token) {
+      console.error("No token found, user is not logged in.");
+      navigate('/');  // Redirect to the home page if no token exists
+      return;
+    }
+  
+    // Log out the user first by removing the token
+    localStorage.removeItem('token');
+  
+    try {
+      // Make the DELETE request to the backend to delete the profile
+      const response = await fetch('http://localhost:5000/delete-profile', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`, // Only send token if it exists
+        },
+      });
+
+
+  
+      if (response.ok) {
+        alert('Profile deleted successfully!');
+        
+        // After deleting the profile, remove the token and redirect
+        localStorage.removeItem('userId');
+        navigate('/'); // Redirect to home page
+        
+        // Force page reload to ensure no stale state
+        window.location.reload(); // This will reload the page to reflect the logged-out state
+      } else {
+        const data = await response.json();
+        setError(data.message || 'Failed to delete profile.');
+      }
+    } catch (error) {
+      console.error('Error deleting profile:', error);
+      setError('An error occurred while deleting the profile.');
+    }
+  };
+  
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-gray-100 p-4">
@@ -135,6 +184,13 @@ function Profile() {
             className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 font-semibold"
           >
             Update Profile
+          </button>
+
+          <button
+            onClick={handleDeleteProfile}
+            className="bg-red-600 text-white p-2 rounded mt-4"
+          >
+            Delete Profile
           </button>
         </form>
       )}

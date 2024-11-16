@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 const path = require('path');
 const fs = require('fs');
+const mongoose = require('mongoose')
 
 
 dotenv.config();
@@ -169,40 +170,31 @@ const getProfile = async (req, res) => {
 
 // Update User Profile
 const updateProfile = async (req, res) => {
-  const { email, name, bio } = req.body;
+  const { email, name, bio} = req.body;
+  
+  
 
   try {
     const updateFields = {};
-
     if (email) updateFields.email = email;
     if (name) updateFields.name = name;
-    if (bio) updateFields.bio = bio;
+    if (bio) updateFields.bio = bio
 
-    // Check if email already exists before updating it
-    if (email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
-        return res.status(400).json({ message: 'Email is already taken' });
-      }
-    }
 
-    const user = await User.findByIdAndUpdate(
-      req.user._id, 
-      { $set: updateFields }, 
-      { new: true, runValidators: true }
-    );
+    const user = await User.findByIdAndUpdate(req.user._id, { $set: updateFields }, { new: true, runValidators: true });
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ message: 'Profile updated successfully', user });
+    user.save();
 
+    
+    res.json({ message: 'Profile updated successfully', user,});
   } catch (error) {
     res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };
-
 
 
 
@@ -238,6 +230,55 @@ const getUserStories = async (req, res) => {
     res.status(200).json({ success: true, data: stories });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Error fetching stories', error: error.message });
+  }
+};
+
+deleteUserProfile = async (req, res) => {
+  try {
+    const userId = req.user._id; // Get the user ID from the token
+    
+    // Delete user's stories first
+    await Story.deleteMany({ author: userId });
+
+    // Delete the user
+    await User.findByIdAndDelete(userId);
+
+    res.status(200).json({ message: 'Profile and associated stories deleted successfully.' });
+  } catch (error) {
+    console.error('Error deleting profile:', error);
+    res.status(500).json({ message: 'An error occurred while deleting the profile.' });
+  }
+};
+
+const searchUser = async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const users = await User.find({
+      username: { $regex: query, $options: 'i' }  // Case-insensitive search
+    });
+
+    const stories = await Story.find({
+      title: { $regex: query, $options: 'i' }
+    });
+
+    // Sending search results back
+    const searchResults = [
+      ...users.map(user => ({
+        id: user._id,
+        type: 'user',
+        username: user.username, // Ensure this is returned
+        name: user.name
+      })),
+      ...stories.map(story => ({
+        id: story._id,
+        type: 'story',
+        title: story.title
+      }))
+    ];
+    res.json(searchResults);
+  } catch (error) {
+    res.status(500).json({ error: 'Error searching' });
   }
 };
 
@@ -372,6 +413,8 @@ const getStoryById = async (req, res) => {
 
 
 
+
+
 module.exports = {
   signup,
   login,
@@ -386,5 +429,7 @@ module.exports = {
   getLikedStories,
   unlikeStory,
   getStoryById,
-  updateStory
+  updateStory,
+  searchUser,
+  deleteUserProfile
 };

@@ -34,7 +34,19 @@ const authenticate = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Error during token verification:', error);
-    res.status(401).json({ error: 'Unauthorized: Token verification failed' });
+
+    // Handle specific errors
+    if (error instanceof jwt.JsonWebTokenError) {
+      // This handles malformed or invalid JWTs
+      return res.status(400).json({ error: 'Unauthorized: Invalid or malformed token' });
+    }
+    if (error instanceof jwt.TokenExpiredError) {
+      // This handles expired JWTs
+      return res.status(401).json({ error: 'Unauthorized: Token has expired' });
+    }
+
+    // Generic catch-all for any other errors
+    return res.status(401).json({ error: 'Unauthorized: Token verification failed' });
   }
 };
 
