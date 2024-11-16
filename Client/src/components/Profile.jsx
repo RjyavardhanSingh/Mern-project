@@ -41,25 +41,34 @@ function Profile() {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setError('');
-
+  
     const token = localStorage.getItem('token');
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('email', email);
-    formData.append('bio', bio);
-
+    const data = {
+      name,
+      email,
+      bio,
+    };
+  
     try {
       const response = await fetch('http://localhost:5000/profiles', {
         method: 'PUT',
         headers: {
-          Authorization: `Bearer ${token}`,
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',  // Set content type to application/json
         },
-        body: formData,
+        body: JSON.stringify(data),  // Send the data as JSON
       });
-
+  
       if (response.ok) {
+        const data = await response.json();
         alert('Profile updated successfully!');
-        navigate('/profile');
+  
+        // Update the local state with the new user data
+        setName(data.user.name);
+        setEmail(data.user.email);
+        setBio(data.user.bio);
+  
+        navigate('/profile'); // Redirect to profile page after update
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to update profile. Please try again.');
@@ -135,7 +144,7 @@ function Profile() {
         {stories.map((story) => (
           <div key={story._id} className="bg-white p-4 rounded shadow-md">
             <h4 className="font-semibold text-lg">{story.title}</h4>
-            <p className="text-sm text-gray-600 mb-2">By {story.author.name}</p>
+            <p className="text-sm text-gray-600 mb-2">By {name}</p>
             <p className="text-gray-700">
               {story.content.length > 100
                 ? `${story.content.substring(0, 100)}...`
@@ -145,6 +154,13 @@ function Profile() {
                 Read more
               </a>
             </p>
+            {/* Add Edit button */}
+            <button
+              onClick={() => navigate(`/edit-story/${story._id}`)}
+              className="mt-2 text-white bg-yellow-500 hover:bg-yellow-600 p-2 rounded"
+            >
+              Edit
+            </button>
           </div>
         ))}
       </div>

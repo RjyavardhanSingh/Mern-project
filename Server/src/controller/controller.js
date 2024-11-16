@@ -111,10 +111,11 @@ const createStory = async (req, res) => {
   }
 
   try {
+    // Assuming req.user contains the logged-in user's details (including _id)
     const newStory = new Story({
       title,
       content,
-      author: req.user.name, // Use the authenticated user's name
+      author: req.user._id,  // Use the authenticated user's ObjectId
       tags: Array.isArray(tags) ? tags : [],
     });
 
@@ -129,9 +130,12 @@ const createStory = async (req, res) => {
   }
 };
 
+
 // Get Stories
+// Get all stories
 const getStories = async (req, res) => {
   try {
+    // Populate the 'author' field with the name of the user
     const stories = await Story.find().populate('author', 'name');
     res.status(200).json(stories);
   } catch (error) {
@@ -142,48 +146,63 @@ const getStories = async (req, res) => {
 // Get User Profile and Stories
 const getProfile = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    const stories = await Story.find({ author: user.name });
-    // const Profile = await Profile.findOne({ user: req.user._id });
-    const profilepictire = user.profilePicture;
+    // Ensure user is authenticated
+    if (!req.user) {
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
 
+    const user = await User.findById(req.user._id);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    res.json({ user, stories,profilepictire });
+    const stories = await Story.find({ author: user._id });
+    res.status(200).json({ user, stories });
   } catch (error) {
+    console.error(error);  // Log the error for better debugging
     res.status(500).json({ message: 'Failed to fetch profile', error: error.message });
   }
 };
 
 
 
+
 // Update User Profile
 const updateProfile = async (req, res) => {
-  const { email, name, password } = req.body;
-  
-  
+  const { email, name, bio } = req.body;
 
   try {
     const updateFields = {};
+
     if (email) updateFields.email = email;
     if (name) updateFields.name = name;
-    if (password) updateFields.password = await bcrypt.hash(password, 10);
+    if (bio) updateFields.bio = bio;
 
+    // Check if email already exists before updating it
+    if (email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== req.user._id.toString()) {
+        return res.status(400).json({ message: 'Email is already taken' });
+      }
+    }
 
-    const user = await User.findByIdAndUpdate(req.user._id, { $set: updateFields }, { new: true, runValidators: true });
+    const user = await User.findByIdAndUpdate(
+      req.user._id, 
+      { $set: updateFields }, 
+      { new: true, runValidators: true }
+    );
 
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    
-    res.json({ message: 'Profile updated successfully', user,});
+    res.json({ message: 'Profile updated successfully', user });
+
   } catch (error) {
     res.status(500).json({ message: 'Failed to update profile', error: error.message });
   }
 };
+
 
 
 
@@ -222,41 +241,135 @@ const getUserStories = async (req, res) => {
   }
 };
 
+const updateStory = async (req, res) => {
+  const { storyId } = req.params;
+  const { title, content, tags } = req.body;
+
+  try {
+    const story = await Story.findById(storyId);
+    if (!story) {
+      return res.status(404).json({ success: false, message: 'Story not found' });
+    }
+
+    if (story.author.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ success: false, message: 'Unauthorized' });
+    }
+
+    story.title = title || story.title;
+    story.content = content || story.content;
+    story.tags = tags || story.tags;
+
+    await story.save();
+
+    res.status(200).json({ success: true, message: 'Story updated successfully', data: story });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Error updating story', error: error.message });
+  }
+};
+
+
 // Like Story
 const likeStory = async (req, res) => {
-  const { storyId } = req.params;
+  const { storyId } = req.params; // Get storyId from URL parameters
+  const userId = req.body.userId; // Get userId from the request body
+
+  if (!userId) {
+    return res.status(400).json({ message: 'User ID is required' }); // Ensure userId is sent
+  }
 
   try {
     // Find the story by ID
     const story = await Story.findById(storyId);
-    console.log(story);
-    
     if (!story) {
       return res.status(404).json({ message: 'Story not found' });
     }
 
-    // Check if the user already liked the story
-    if (!Array.isArray(story.likes)) {
-      story.likes = [];  // Initialize as an empty array if it's not an array
+    // Check if the user has already liked the story
+    if (story.likes.includes(userId)) {
+      return res.status(400).json({ message: 'You have already liked this story' });
     }
 
-    if (!story.likes.includes(req.user._id)) {
-      // Add user ID to the likes array
-      story.likes.push(req.user._id);
-      await story.save();
+    // Add the user to the likes array of the story
+    story.likes.push(userId);
+    await story.save();
 
-      // Count the number of likes
-      const likesCount = story.likes.length;
-
-      res.status(200).json({ message: 'Story liked successfully', likesCount });
-    } else {
-      res.status(400).json({ message: 'You already liked this story' });
+    // Add the story to the user's likedStories array
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
     }
+
+    user.likedStories.push(storyId);
+    await user.save();
+
+    res.status(200).json({ message: 'Story liked successfully' });
   } catch (error) {
     console.error('Error liking story:', error);
-    res.status(500).json({ message: 'Error liking the story', error: error.message });
+    res.status(500).json({ message: 'Failed to like story' });
   }
 };
+
+
+const getLikedStories = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Find the user by ID and populate the likedStories field
+    const user = await User.findById(userId).populate('likedStories');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(user.likedStories);
+  } catch (error) {
+    console.error('Error fetching liked stories:', error);
+    res.status(500).json({ message: 'Failed to fetch liked stories' });
+  }
+};
+
+const unlikeStory = async (req, res) => {
+  try {
+    const { userId, storyId } = req.params;
+
+    // Find the user by ID
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Find the story by ID
+    const story = await Story.findById(storyId);
+    if (!story) {
+      return res.status(404).json({ message: 'Story not found' });
+    }
+
+    // Remove the story from the user's liked stories
+    user.likedStories.pull(storyId);
+    await user.save(); // Save the updated user document
+
+    res.status(200).json({ message: 'Story unliked successfully' });
+  } catch (error) {
+    console.error('Error unliking story:', error);
+    res.status(500).json({ message: 'Failed to unlike story' });
+  }
+};
+
+
+const getStoryById = async (req, res) => {
+  const { storyId } = req.params;
+
+  try {
+    const story = await Story.findById(storyId).populate('author', 'name');
+    if (!story) {
+      return res.status(404).json({ message: 'Story not found' });
+    }
+    res.status(200).json(story);
+  } catch (error) {
+    console.error('Error fetching story:', error);
+    res.status(500).json({ message: 'Failed to fetch story', error: error.message });
+  }
+};
+
 
 
 module.exports = {
@@ -269,5 +382,9 @@ module.exports = {
   getFeed,
   submitInterests,
   getUserStories,
-  likeStory
+  likeStory,
+  getLikedStories,
+  unlikeStory,
+  getStoryById,
+  updateStory
 };

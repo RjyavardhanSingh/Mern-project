@@ -7,6 +7,9 @@ import Home from './components/Home';
 import Profile from './components/Profile';
 import WriteStory from './components/WriteStory';
 import Interests from './components/Interests';
+import Library from './components/Library';
+import StoryDetails from './components/StoryDetails';
+import EditStory from './components/EditStory'; // Import the StoryEdit component
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -21,7 +24,6 @@ function App() {
   }, []);
 
   const handleLogin = (token) => {
-    // Store token in localStorage
     localStorage.setItem('token', token);
     setIsAuthenticated(true);
   };
@@ -38,10 +40,9 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/signup" element={<SignUp />} />
-        
-        {/* Update the Interests route to include user id as a parameter */}
         <Route path="/interests" element={<Interests />} />
-
+        
+        {/* Protect Profile, WriteStory, and Library routes */}
         <Route 
           path="/profile" 
           element={isAuthenticated ? <Profile onLogout={handleLogout} /> : <Navigate to="/login" />} 
@@ -49,6 +50,19 @@ function App() {
         <Route 
           path="/write" 
           element={isAuthenticated ? <WriteStory /> : <Navigate to="/login" />} 
+        />
+        <Route 
+          path="/library" 
+          element={isAuthenticated ? <Library /> : <Navigate to="/login" />} 
+        />
+
+        {/* Route for story details */}
+        <Route path="/stories/:id" element={<StoryDetails />} />
+
+        {/* New route for editing a story */}
+        <Route 
+          path="/edit-story/:id" 
+          element={isAuthenticated ? <EditStory /> : <Navigate to="/login" />} 
         />
       </Routes>
     </Router>
