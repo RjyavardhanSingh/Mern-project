@@ -50,9 +50,9 @@ function Navbar() {
   };
 
   return (
-    <nav className="bg-blue-600 p-4 relative">
+    <nav className="bg-[#d4803c] bg-opacity-85 p-4 relative">
       <div className="container mx-auto flex justify-between items-center">
-        <Link to="/" className="text-white font-bold text-lg">
+        <Link to="/" className="text-[#322214] font-bold text-lg">
           Story Writing Platform
         </Link>
         <div className="relative">
@@ -66,7 +66,7 @@ function Navbar() {
             />
             <button
               type="submit"
-              className="bg-white text-blue-600 p-2 text-2xl rounded-r-md hover:bg-gray-200"
+              className="bg-white text-[#d9bda6] p-2 text-2xl rounded-r-md hover:bg-gray-200"
             >
               <CiSearch />
             </button>
@@ -107,10 +107,10 @@ function Navbar() {
             </>
           ) : (
             <>
-              <Link to="/login" className="text-white mx-2">
+              <Link to="/login" className="text-[#322214] mx-2">
                 Login
               </Link>
-              <Link to="/signup" className="text-white mx-2">
+              <Link to="/signup" className="text-[#322214] mx-2">
                 Sign Up
               </Link>
             </>

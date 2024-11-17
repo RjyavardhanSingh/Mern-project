@@ -35,7 +35,7 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen bg-[#d9a87d]">
       {/* Info section on the left */}
       <div className="flex-1 bg-gray-200 flex flex-col justify-center items-center p-10 text-center">
         <h1 className="text-3xl font-bold mb-4">Join the Community</h1>
@@ -44,7 +44,7 @@ const SignUp = () => {
 
       {/* Signup form section on the right */}
       <div className="flex-1 flex items-center justify-center p-10">
-        <form onSubmit={handleSignup} className="bg-white p-8 rounded shadow-md max-w-sm w-full">
+        <form onSubmit={handleSignup} className="bg-[#ba997c] p-8 rounded shadow-md max-w-sm w-full">
           <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
 
           <div className="mb-4">
@@ -55,7 +55,7 @@ const SignUp = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
             />
           </div>
 
@@ -67,7 +67,7 @@ const SignUp = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
             />
           </div>
 
@@ -79,7 +79,7 @@ const SignUp = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
             />
           </div>
 
@@ -90,18 +90,18 @@ const SignUp = () => {
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
               placeholder="Tell us something about yourself"
             />
           </div>
 
-          <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 font-semibold mb-4">
+          <button type="submit" className="w-full bg-[#804919] text-white py-2 rounded hover:bg-[#976c46] font-semibold mb-4">
             Sign Up
           </button>
 
           <p className="text-center text-sm text-gray-600">
             Already have an account?{' '}
-            <span className="text-blue-500 cursor-pointer" onClick={() => navigate('/login')}>
+            <span className="text-[#804919] cursor-pointer" onClick={() => navigate('/login')}>
               Login
             </span>
           </p>
