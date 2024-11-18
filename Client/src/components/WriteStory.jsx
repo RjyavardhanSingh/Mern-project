@@ -1,35 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import {
+  Bold,
+  Italic,
+  Underline,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
+  List,
+  ListOrdered,
+  Undo,
+  Redo,
+  Type,
+  Palette,
+} from 'lucide-react';
 
 function WriteStory() {
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
-  const [tags, setTags] = useState(''); 
+  const [tags, setTags] = useState('');
   const [error, setError] = useState('');
+  const [showColorGrid, setShowColorGrid] = useState(false);
   const navigate = useNavigate();
+  const editorRef = useRef(null);
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editorRef.current.innerHTML = content;
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-  
+
     try {
-      const token = localStorage.getItem('token'); // Retrieve the JWT token from local storage
+      const token = localStorage.getItem('token');
       const response = await fetch('http://localhost:5000/stories', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
-          'Authorization': `bearer ${token}`, // Pass the token to authenticate the user
+          Authorization: `bearer ${token}`,
         },
-        body: JSON.stringify({ 
-          title, 
-          content, 
-          tags: tags.split(',').map(tag => tag.trim()) // Convert tags into an array
-        }), 
+        body: JSON.stringify({
+          title,
+          content: editorRef.current.innerHTML,
+          tags: tags.split(',').map((tag) => tag.trim()),
+        }),
       });
-  
+
       if (response.ok) {
         alert('Story submitted successfully!');
-        navigate('/profile'); // Redirect to the profile page after success
+        navigate('/profile');
       } else {
         const data = await response.json();
         setError(data.message || 'Failed to submit the story. Please try again.');
@@ -38,58 +61,128 @@ function WriteStory() {
       setError('An error occurred. Please try again.');
     }
   };
-  
+
+  const handleFormat = (command, value = null) => {
+    document.execCommand(command, false, value);
+    editorRef.current.focus();
+  };
+
+  const colorOptions = [
+    '#FF0000', '#00FF00', '#0000FF',
+    '#FFFF00', '#FF00FF', '#00FFFF',
+    '#FFFFFF', '#000000', '#808080',
+  ];
+
   return (
-    <div
-      className="min-h-screen flex flex-col items-center justify-center relative"
-      style={{
-        backgroundImage: "url('https://images.unsplash.com/photo-1697029749544-ffa7f15f9dd0?fm=jpg&q=60&w=3000&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTJ8fGJvb2slMjBhZXN0aGV0aWN8ZW58MHx8MHx8fDA%3D')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundColor: "#A67C52",
-      }}
-    >
-      {/* Background Overlay */}
-      <div className="absolute inset-0 bg-[#4B2E1A] opacity-50"></div>
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold text-center">Write Your Story</h1>
+        {error && <p className="text-red-500 text-center">{error}</p>}
 
-      {/* Main Content */}
-      <div className="relative z-10 w-full max-w-4xl text-center py-8 px-4">
-        <h1 className="text-3xl font-bold mb-6 text-[#F5F3EF] font-cursive">Write Your Story</h1>
-        {error && <p className="text-red-500 mb-4">{error}</p>}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-2">
+            <label htmlFor="title" className="text-sm font-medium">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="Enter your story title"
+            />
+          </div>
 
-        <form onSubmit={handleSubmit} className="bg-white p-8 rounded-lg shadow-md">
-          <label htmlFor="title" className="block font-semibold mb-2 text-[#4B2E1A]">Title</label>
-          <input
-            type="text"
-            id="title"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="space-y-2">
+            <label htmlFor="content" className="text-sm font-medium">
+              Content
+            </label>
+            <div className="border border-gray-700 rounded-lg overflow-hidden">
+              <div className="bg-gray-800 p-2 flex items-center gap-1 flex-wrap border-b border-gray-700">
+                {[
+                  { icon: Undo, command: 'undo' },
+                  { icon: Redo, command: 'redo' },
+                  { icon: Bold, command: 'bold' },
+                  { icon: Italic, command: 'italic' },
+                  { icon: Underline, command: 'underline' },
+                  { icon: AlignLeft, command: 'justifyLeft' },
+                  { icon: AlignCenter, command: 'justifyCenter' },
+                  { icon: AlignRight, command: 'justifyRight' },
+                  { icon: AlignJustify, command: 'justifyFull' },
+                  { icon: List, command: 'insertUnorderedList' },
+                  { icon: ListOrdered, command: 'insertOrderedList' },
+                ].map((item, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    onClick={() => handleFormat(item.command)}
+                    className="p-1 text-gray-400 hover:text-gray-100 focus:outline-none"
+                  >
+                    <item.icon className="h-4 w-4" />
+                  </button>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => setShowColorGrid(!showColorGrid)}
+                  className="p-1 text-gray-400 hover:text-gray-100 focus:outline-none"
+                >
+                  <Palette className="h-4 w-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const size = prompt('Enter font size (1-7):');
+                    if (size) handleFormat('fontSize', size);
+                  }}
+                  className="p-1 text-gray-400 hover:text-gray-100 focus:outline-none"
+                >
+                  <Type className="h-4 w-4" />
+                </button>
+              </div>
+              {showColorGrid && (
+                <div className="absolute bg-gray-800 border border-gray-700 rounded-lg p-2 grid grid-cols-3 gap-2 mt-2">
+                  {colorOptions.map((color, index) => (
+                    <button
+                      key={index}
+                      type="button"
+                      className="w-8 h-8 rounded-full"
+                      style={{ backgroundColor: color }}
+                      onClick={() => {
+                        handleFormat('foreColor', color);
+                        setShowColorGrid(false);
+                      }}
+                    ></button>
+                  ))}
+                </div>
+              )}
+              <div
+                ref={editorRef}
+                contentEditable
+                className="min-h-[300px] p-4 bg-gray-800 focus:outline-none"
+                onInput={() => setContent(editorRef.current.innerHTML)}
+              />
+            </div>
+          </div>
 
-          <label htmlFor="content" className="block font-semibold mb-2 text-[#4B2E1A]">Content</label>
-          <textarea
-            id="content"
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-            rows="6"
-            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          ></textarea>
-
-          <label htmlFor="tags" className="block font-semibold mb-2 text-[#4B2E1A]">Tags (comma-separated)</label>
-          <input
-            type="text"
-            id="tags"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="space-y-2">
+            <label htmlFor="tags" className="text-sm font-medium">
+              Tags (comma-separated)
+            </label>
+            <input
+              type="text"
+              id="tags"
+              value={tags}
+              onChange={(e) => setTags(e.target.value)}
+              className="w-full p-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-orange-500"
+              placeholder="fiction, romance, mystery"
+            />
+          </div>
 
           <button
             type="submit"
-            className="w-full bg-[#4B2E1A] text-[#F5F3EF] p-2 rounded-lg shadow-md hover:bg-[#8C4D2E] font-semibold transition-all"
+            className="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-md transition duration-300"
           >
             Submit Story
           </button>

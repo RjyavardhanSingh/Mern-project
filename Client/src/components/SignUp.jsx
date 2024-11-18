@@ -5,29 +5,27 @@ const SignUp = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
-  const [bio, setBio] = useState(''); // Added bio state
+  const [bio, setBio] = useState('');
   const navigate = useNavigate();
 
   const handleSignup = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://localhost:5000/signup', { 
+      const response = await fetch('http://localhost:5000/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, email, password, bio }), // Send bio to the backend
+        body: JSON.stringify({ name, email, password, bio }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
-        throw new Error(data.message || 'Signup failed'); 
+        throw new Error(data.message || 'Signup failed');
       }
-  
-      // Save the user's userId in localStorage
+
       localStorage.setItem('userId', data.userId);
-  
-      alert(data.message); 
-      navigate('/interests'); 
+      alert(data.message);
+      navigate('/interests');
     } catch (error) {
       console.error('Error during signup:', error);
       alert('Signup failed: ' + error.message);
@@ -35,77 +33,79 @@ const SignUp = () => {
   };
 
   return (
-    <div className="flex h-screen bg-[#d9a87d]">
-      {/* Info section on the left */}
-      <div className="flex-1 bg-gray-200 flex flex-col justify-center items-center p-10 text-center">
-        <h1 className="text-3xl font-bold mb-4">Join the Community</h1>
-        <p className="text-lg text-gray-600">Sign up today to explore amazing stories and connect with others!</p>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 flex flex-col md:flex-row items-center justify-center px-6 py-8">
+      <div className="md:w-1/2 max-w-md mb-8 md:mb-0 md:mr-8 text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Join the Community</h1>
+        <p className="text-xl text-gray-600">Create your account and start exploring amazing stories.</p>
       </div>
 
-      {/* Signup form section on the right */}
-      <div className="flex-1 flex items-center justify-center p-10">
-        <form onSubmit={handleSignup} className="bg-[#ba997c] p-8 rounded shadow-md max-w-sm w-full">
-          <h2 className="text-2xl font-bold mb-4 text-center">Sign Up</h2>
+      <div className="w-full md:w-1/2 max-w-md">
+        <form onSubmit={handleSignup} className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Sign Up</h2>
 
           <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-semibold mb-2">Username</label>
+            <label htmlFor="name" className="block text-gray-700 text-sm font-bold mb-2">Username</label>
             <input
               type="text"
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="email" className="block text-sm font-semibold mb-2">Email</label>
+            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
           <div className="mb-4">
-            <label htmlFor="password" className="block text-sm font-semibold mb-2">Password</label>
+            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Password</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          {/* Bio Field */}
           <div className="mb-4">
-            <label htmlFor="bio" className="block text-sm font-semibold mb-2">Bio</label>
+            <label htmlFor="bio" className="block text-gray-700 text-sm font-bold mb-2">Bio</label>
             <textarea
               id="bio"
               value={bio}
               onChange={(e) => setBio(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Tell us something about yourself"
             />
           </div>
 
-          <button type="submit" className="w-full bg-[#804919] text-white py-2 rounded hover:bg-[#976c46] font-semibold mb-4">
+          <button
+            type="submit"
+            className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105 w-full"
+          >
             Sign Up
           </button>
-
-          <p className="text-center text-sm text-gray-600">
-            Already have an account?{' '}
-            <span className="text-[#804919] cursor-pointer" onClick={() => navigate('/login')}>
-              Login
-            </span>
-          </p>
         </form>
+        <p className="text-center text-gray-600 text-sm">
+          Already have an account?{' '}
+          <span
+            className="text-orange-500 hover:text-orange-800 cursor-pointer font-bold"
+            onClick={() => navigate('/login')}
+          >
+            Login
+          </span>
+        </p>
       </div>
     </div>
   );

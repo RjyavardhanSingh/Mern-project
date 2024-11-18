@@ -40,55 +40,62 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="flex h-screen bg-[#d9a87d]">
-      <div className="flex-1 bg-gray-200 flex flex-col justify-center items-center p-10 text-center">
-        <h1 className="text-3xl font-bold mb-4">Start Reading Stories</h1>
-        <p className="text-lg text-gray-600">No Subscription Required.</p>
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 flex flex-col md:flex-row items-center justify-center px-6 py-8">
+      <div className="md:w-1/2 max-w-md mb-8 md:mb-0 md:mr-8 text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome Back</h1>
+        <p className="text-xl text-gray-600">Dive into a world of stories. Your next adventure awaits.</p>
       </div>
       
-      <div className="flex-1 flex items-center justify-center p-10">
-        <form onSubmit={handleLogin} className="bg-[#ba997c] p-8 rounded shadow-md max-w-sm w-full">
-          <h2 className="text-2xl font-bold mb-4 text-center">Login</h2>
-          {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+      <div className="w-full md:w-1/2 max-w-md">
+        <form onSubmit={handleLogin} className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4">
+          <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Login</h2>
+          {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
           <div className="mb-4">
-            <label htmlFor="email" className="block font-semibold mb-2">Email</label>
+            <label htmlFor="email" className="block text-gray-700 text-sm font-bold mb-2">Email</label>
             <input
               type="email"
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          <div className="mb-4">
-            <label htmlFor="password" className="block font-semibold mb-2">Password</label>
+          <div className="mb-6">
+            <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Password</label>
             <input
               type="password"
               id="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-[#d9a87d]"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:ring-2 focus:ring-orange-500"
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-[#804919] text-white p-2 rounded hover:bg-[#976c46]  font-semibold mb-4"
-          >
-            Login
-          </button>
-
-          <p className="text-center text-sm text-gray-600">
-            Don't have an account?{' '}
-            <span className="text-[#804919] cursor-pointer" onClick={() => navigate('/signup')}>
-              Sign Up
-            </span>
-          </p>
+          <div className="flex items-center justify-between">
+            <button
+              type="submit"
+              className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105"
+            >
+              Sign In
+            </button>
+            <a className="inline-block align-baseline font-bold text-sm text-orange-500 hover:text-orange-800" href="#">
+              Forgot Password?
+            </a>
+          </div>
         </form>
+        <p className="text-center text-gray-600 text-sm">
+          Don't have an account?{' '}
+          <span 
+            className="text-orange-500 hover:text-orange-800 cursor-pointer font-bold" 
+            onClick={() => navigate('/signup')}
+          >
+            Sign Up
+          </span>
+        </p>
       </div>
     </div>
   );
