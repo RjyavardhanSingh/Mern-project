@@ -149,7 +149,7 @@ export default function Home() {
                   >
                     <div className="h-48 bg-gray-700 relative">
                       <img
-                        src={story.coverImage || '/placeholder.svg?height=192&width=384'}
+                        src={story.coverImage || '/story-cards1.jpeg'}
                         alt={story.title}
                         className="w-full h-full object-cover"
                       />

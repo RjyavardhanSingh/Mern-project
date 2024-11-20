@@ -40,14 +40,14 @@ function Login({ onLogin }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 flex flex-col md:flex-row items-center justify-center px-6 py-8">
+    <div className="min-h-screen bg-gray-900 flex flex-col md:flex-row items-center justify-center px-6 py-8">
       <div className="md:w-1/2 max-w-md mb-8 md:mb-0 md:mr-8 text-center">
         <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome Back</h1>
         <p className="text-xl text-gray-600">Dive into a world of stories. Your next adventure awaits.</p>
       </div>
       
       <div className="w-full md:w-1/2 max-w-md">
-        <form onSubmit={handleLogin} className="bg-white shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4">
+        <form onSubmit={handleLogin} className="bg-gray-700 shadow-xl rounded-lg px-8 pt-6 pb-8 mb-4">
           <h2 className="text-3xl font-bold mb-6 text-center text-gray-900">Login</h2>
           {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>}
 
@@ -80,7 +80,7 @@ function Login({ onLogin }) {
               type="submit"
               className="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-300 ease-in-out transform hover:scale-105"
             >
-              Sign In
+              Log In
             </button>
             <a className="inline-block align-baseline font-bold text-sm text-orange-500 hover:text-orange-800" href="#">
               Forgot Password?

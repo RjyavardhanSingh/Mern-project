@@ -80,17 +80,20 @@ function Profile() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-200 p-8 font-serif">
+    <div className="min-h-screen bg-gray-900 text-gray-200 p-8">
       <div className="max-w-6xl mx-auto">
         <header className="mb-12 flex justify-between items-center">
-          <h1 className="text-4xl font-bold text-[#D4AF37]">Profile Settings</h1>
-          <div className="w-20 h-20 bg-[#8C4D2E] rounded-full flex items-center justify-center text-3xl font-bold text-white">
+          <h1 className="text-4xl font-bold text-[#ffffff]">Profile Settings</h1>
+          <div className="w-20 h-20 bg-[#D4AF37] rounded-full flex items-center justify-center text-3xl font-bold text-gray-900">
             {name.charAt(0)}
           </div>
         </header>
 
         {error && (
-          <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded relative mb-6" role="alert">
+          <div
+            className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded relative mb-6"
+            role="alert"
+          >
             <span className="block sm:inline">{error}</span>
           </div>
         )}
@@ -98,51 +101,60 @@ function Profile() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-1">
             <div className="bg-[#2a2a2a] rounded-lg p-6 shadow-lg">
-              <h2 className="text-2xl font-semibold text-[#D2B48C] mb-4">{name}</h2>
+              <h2 className="text-2xl font-sherif text-[#D4AF37] mb-4">{name}</h2>
               <p className="text-gray-400 mb-2">{email}</p>
               <p className="italic text-gray-400 mb-6">
                 {bio || "No bio available. Update your profile to add a bio."}
               </p>
               <button
                 onClick={() => setShowUpdateForm(!showUpdateForm)}
-                className="w-full bg-[#8C4D2E] text-white py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-[#D2B48C] hover:text-[#1a1a1a]"
+                className="w-full bg-[#D4AF37] text-gray-900 py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-gray-700 hover:text-[#D4AF37]"
               >
                 {showUpdateForm ? "Cancel" : "Update Profile"}
               </button>
             </div>
 
             {showUpdateForm && (
-              <form onSubmit={handleProfileUpdate} className="mt-6 bg-[#2a2a2a] rounded-lg p-6 shadow-lg">
+              <form
+                onSubmit={handleProfileUpdate}
+                className="mt-6 bg-[#2a2a2a] rounded-lg p-6 shadow-lg"
+              >
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Name:</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Name:
+                  </label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#8C4D2E] focus:border-[#8C4D2E]"
+                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#D4AF37] focus:border-[#D4AF37]"
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Email:</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Email:
+                  </label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#8C4D2E] focus:border-[#8C4D2E]"
+                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#D4AF37] focus:border-[#D4AF37]"
                   />
                 </div>
                 <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Bio:</label>
+                  <label className="block text-sm font-medium text-gray-400 mb-1">
+                    Bio:
+                  </label>
                   <textarea
                     value={bio}
                     onChange={(e) => setBio(e.target.value)}
-                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#8C4D2E] focus:border-[#8C4D2E]"
+                    className="w-full p-2 bg-[#1a1a1a] border border-gray-700 rounded text-white focus:ring-[#D4AF37] focus:border-[#D4AF37]"
                     rows="4"
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-[#8C4D2E] text-white py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-[#D2B48C] hover:text-[#1a1a1a]"
+                  className="w-full bg-[#D4AF37] text-gray-900 py-2 px-4 rounded transition duration-300 ease-in-out hover:bg-gray-700 hover:text-[#D4AF37]"
                 >
                   Save Changes
                 </button>
@@ -157,8 +169,8 @@ function Profile() {
                   onClick={() => setActiveTab("stories")}
                   className={`px-6 py-3 font-semibold transition duration-300 ease-in-out ${
                     activeTab === "stories"
-                      ? "text-[#D2B48C] border-b-2 border-[#D2B48C]"
-                      : "text-gray-400 hover:text-[#D2B48C]"
+                      ? "text-[#D4AF37] border-b-2 border-[#D4AF37]"
+                      : "text-gray-400 hover:text-[#D4AF37]"
                   }`}
                 >
                   Your Stories
@@ -175,7 +187,9 @@ function Profile() {
                           className="bg-[#1a1a1a] rounded-lg shadow-md overflow-hidden"
                         >
                           <div className="p-4">
-                            <h4 className="font-bold text-xl mb-2 text-[#D2B48C]">{story.title}</h4>
+                            <h4 className="font-bold text-xl mb-2 text-[#D4AF37]">
+                              {story.title}
+                            </h4>
                             <p className="text-sm text-gray-400 mb-3">By {name}</p>
                             <p className="text-sm mb-4 text-gray-300">
                               {story.content.length > 100
@@ -185,13 +199,13 @@ function Profile() {
                             <div className="flex justify-between items-center">
                               <button
                                 onClick={() => navigate(`/stories/${story._id}`)}
-                                className="text-text-gray-400 hover:text-[#D2B48C] transition duration-300"
+                                className="text-text-gray-400 hover:text-[#D4AF37] transition duration-300"
                               >
                                 Read more
                               </button>
                               <button
                                 onClick={() => navigate(`/edit-story/${story._id}`)}
-                                className="bg-[#8C4D2E] text-white py-1 px-4 rounded transition duration-300 ease-in-out hover:bg-[#D2B48C] hover:text-[#1a1a1a]"
+                                className="bg-[#D4AF37] text-gray-900 py-1 px-4 rounded transition duration-300 ease-in-out hover:bg-gray-700 hover:text-[#D4AF37]"
                               >
                                 Edit
                               </button>

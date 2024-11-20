@@ -9,7 +9,7 @@ function StoryDetails() {
   useEffect(() => {
     const fetchStory = async () => {
       try {
-        const token = localStorage.getItem('token'); // Retrieve token from localStorage
+        const token = localStorage.getItem('token');
         if (!token) {
           throw new Error('User is not authenticated');
         }
@@ -17,7 +17,7 @@ function StoryDetails() {
         const response = await fetch(`http://localhost:5000/clicked/stories/${id}`, {
           method: 'GET',
           headers: {
-            Authorization: `Bearer ${token}`, // Add the token in the Authorization header
+            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         });
@@ -39,18 +39,36 @@ function StoryDetails() {
   }, [id]);
 
   if (loading) {
-    return <p>Loading story...</p>;
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-[#D4AF37] text-2xl font-semibold">Loading story...</div>
+      </div>
+    );
   }
 
   if (!story) {
-    return <p>Story not found.</p>;
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-[#D4AF37] text-2xl font-semibold">Story not found.</div>
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-4xl font-bold mb-4">{story.title}</h1>
-      <p className="text-sm text-gray-600 mb-4">By {story.author?.name || 'Unknown Author'}</p>
-      <p className="text-lg text-gray-800">{story.content}</p>
+    <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-3xl mx-auto">
+        <div className="bg-gray-800 shadow-lg rounded-lg overflow-hidden">
+          <div className="p-8">
+            <h1 className="text-4xl font-bold mb-4 text-[#D4AF37]">{story.title}</h1>
+            <p className="text-sm text-gray-400 mb-6">
+              By {story.author?.name || 'Unknown Author'}
+            </p>
+            <div className="prose prose-invert max-w-none">
+              <p className="text-lg leading-relaxed text-gray-300">{story.content}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
