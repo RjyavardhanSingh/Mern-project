@@ -12,7 +12,7 @@ dotenv.config();
 const app = express();
 
 const corsOptions = {
-  origin: 'https://mern-project-5vz5.onrender.com', // Allow any origin in development
+  origin: '*', // Allow any origin in development
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   credentials: true,
   optionsSuccessStatus: 204,
