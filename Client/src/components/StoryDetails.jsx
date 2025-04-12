@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { API_ENDPOINTS } from '../api/api';
 
 function StoryDetails() {
   const { id } = useParams();
@@ -14,7 +15,7 @@ function StoryDetails() {
           throw new Error('User is not authenticated');
         }
 
-        const response = await fetch(`http://localhost:5000/clicked/stories/${id}`, {
+        const response = await fetch(API_ENDPOINTS.STORY_BY_ID(id), {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

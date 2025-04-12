@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { API_ENDPOINTS } from '../api/api';
 
 function Profile() {
   const [name, setName] = useState("");
@@ -20,7 +21,7 @@ function Profile() {
       }
 
       try {
-        const response = await fetch("http://localhost:5000/profiles", {
+        const response = await fetch(API_ENDPOINTS.PROFILE, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -54,7 +55,7 @@ function Profile() {
     }
 
     try {
-      const response = await fetch("http://localhost:5000/profiles", {
+      const response = await fetch(API_ENDPOINTS.PROFILE, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

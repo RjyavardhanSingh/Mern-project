@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../api/api';
 
 function EditStory() {
   const [stories, setStories] = useState([]);
@@ -11,7 +12,7 @@ function EditStory() {
     const fetchUserStories = async () => {
       const token = localStorage.getItem('token');
       try {
-        const response = await fetch('http://localhost:5000/stories/user', {
+        const response = await fetch(API_ENDPOINTS.USER_STORIES, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -42,7 +43,7 @@ function EditStory() {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/stories/${selectedStory._id}`,
+        API_ENDPOINTS.STORY_BY_ID(selectedStory._id),
         {
           method: 'PUT',
           headers: {

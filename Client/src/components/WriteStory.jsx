@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../api/api';
 import {
   Bold,
   Italic,
@@ -37,7 +38,7 @@ function WriteStory() {
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/stories', {
+      const response = await fetch(API_ENDPOINTS.STORIES, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

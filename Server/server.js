@@ -11,11 +11,18 @@ dotenv.config();
 
 const app = express();
 
+const corsOptions = {
+  origin: 'https://mern-project-5vz5.onrender.com', // Allow any origin in development
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+  optionsSuccessStatus: 204,
+};
 
 
 
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
+
 // Serve static files from the 'uploads' directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 

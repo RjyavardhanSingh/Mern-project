@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Book, ChevronRight } from 'lucide-react';
+import { API_ENDPOINTS } from '../api/api';
 
 const Library = () => {
   const [likedStories, setLikedStories] = useState([]);
@@ -15,7 +16,7 @@ const Library = () => {
       }
 
       try {
-        const response = await fetch(`http://localhost:5000/stories/${userId}`, {
+        const response = await fetch(API_ENDPOINTS.USER_LIKED_STORIES(userId), {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -48,7 +49,7 @@ const Library = () => {
     }
   
     try {
-      const url = `http://localhost:5000/stories/${storyId}/like`;
+      const url = API_ENDPOINTS.LIKE_STORY(storyId);
       const method = isLiked ? 'DELETE' : 'POST';
       const response = await fetch(url, {
         method,
@@ -69,7 +70,7 @@ const Library = () => {
       if (isLiked) {
         setLikedStories(prevStories => prevStories.filter(story => story._id !== storyId));
       } else {
-        const updatedStory = await fetch(`http://localhost:5000/stories/${storyId}`).then(res => res.json());
+        const updatedStory = await fetch(API_ENDPOINTS.GET_STORY(storyId)).then(res => res.json());
         setLikedStories(prevStories => [...prevStories, updatedStory]);
       }
     } catch (error) {

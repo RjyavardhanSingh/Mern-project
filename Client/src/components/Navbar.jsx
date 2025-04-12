@@ -29,7 +29,7 @@ function Navbar() {
     if (searchQuery.trim()) {
       try {
         const response = await fetch(
-          `http://localhost:5000/search?query=${encodeURIComponent(searchQuery)}`
+          API_ENDPOINTS.SEARCH(searchQuery)
         );
         if (response.ok) {
           const results = await response.json();

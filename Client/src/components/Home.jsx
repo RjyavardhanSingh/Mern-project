@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS, authenticatedRequest } from '../api/api';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -20,7 +21,7 @@ export default function Home() {
 
   const fetchFeed = async (token) => {
     try {
-      const response = await fetch('http://localhost:5000/feeds', {
+      const response = await fetch(API_ENDPOINTS.FEED, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -51,7 +52,7 @@ export default function Home() {
     try {
       setLikedStories((prev) => ({ ...prev, [storyId]: true }));
 
-      const response = await fetch(`http://localhost:5000/stories/${storyId}/like`, {
+      const response = await fetch(API_ENDPOINTS.LIKE_STORY(storyId), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

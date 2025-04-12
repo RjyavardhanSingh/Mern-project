@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../api/api';
 
 const Interests = () => {
   const [selectedInterests, setSelectedInterests] = useState([]);
@@ -40,7 +41,7 @@ const Interests = () => {
     console.log('Interests data being sent:', interestsData);
 
     try {
-      const response = await fetch('http://localhost:5000/interests', {
+      const response = await fetch(API_ENDPOINTS.INTERESTS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
